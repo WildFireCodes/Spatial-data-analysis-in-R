@@ -1,0 +1,48 @@
+```{r}
+library(spatstat)
+
+points<-data.frame(runif(200,min=0,max=1),runif(200,min=0,max=2))
+dim(points)
+head(points)
+
+
+library(ggplot2)
+colnames(points)<-c('X','Y')
+head(points)
+ggplot(data=points,aes(X,Y))+geom_point()+ggtitle('Points generated with runif')+theme(plot.title = element_text(hjust = 0.5))
+
+#poprawiona skala - domyslnie ratio ustawione na 1
+ggplot(data=points,aes(X,Y))+geom_point()+coord_fixed()+ggtitle('Points - fixed coordinates')+theme(plot.title = element_text(hjust = 0.5))
+```
+```{r}
+r_squared<-runif(300,min=0,max=100)
+angle<-runif(300,min=0,max=2*pi)
+
+#obliczanie wspolrzednych x i y
+x<-sqrt(r_squared)*cos(angle)
+y<-sqrt(r_squared)*sin(angle)
+
+points2<-data.frame(x,y)
+dim(points2)
+head(points2)
+
+colnames(points2)<-c("X","Y")
+#ggplot(data=points2,aes(X,Y))+geom_point()
+```
+
+```{r}
+plot(disc(radius=10),main='Points2 and disc with 10 radius')
+points(points2$X,points2$Y)
+```
+```{r}
+planarpointpattern<-ppp(points2$X,points2$Y,window = disc(radius=10))
+quadrat.test(planarpointpattern)
+
+#wartosc p value nie pozwala odrzucic hipotezy zerowej o calkowicie losowym rozmieszczeniu punktow
+
+#losowy wzorzec Poissona - intensywnosc lambda to iloraz aproksymowanej ilosci punktow przez powierzchnie kola
+rpoispp(lambda=500/area(disc(radius=10)),win=disc(radius=10))
+#Planar point pattern: 519 points
+```
+
+
