@@ -1,0 +1,59 @@
+```{r}
+#funkcja k wzajemna odleglosc
+#funkcja g do najblizszego sasiada
+#funckja f pustej przestrzeni
+
+library(spatstat)
+
+#punkty o rozkladzie niezaleznym - Poissona
+points_poisson <- rpoispp(10, win=disc(10))
+plot(points_poisson)
+
+#punkty o rozkladzie regularnym - proces Straussa
+points_strauss <- rStrauss(10, gamma=0.3, W=disc(10))
+plot(points_strauss)
+#Strauss process is a model for spatial inhibition, ranging from a strong ‘hard core’ inhibition to a completely random pattern according to the value of gamma.
+
+#punkty o rozkladzie pogrupowanym, tendecja do klasteryzacji
+thomas_points <- rThomas(kappa=0.3, scale=2,  mu=2, win=disc(10))
+plot(thomas_points)
+#opis procesu + uzytych parametrow
+
+dist_poisson <- nndist(points_poisson)
+hist(dist_poisson)
+dist_strauss <- nndist(points_strauss)
+hist(dist_strauss)
+dist_thomas <- nndist(thomas_points)
+hist(dist_thomas)
+```
+
+```{r}
+#prawdopodobienstwo, ze punkt ma najblizzego sasiada w odleglosci r
+pnnd_poisson <- Gest(points_poisson)
+plot(pnnd_poisson)
+
+pnnd_strauss <- Gest(points_strauss)
+plot(pnnd_strauss)
+
+pnnd_thomas <- Gest(thomas_points)
+plot(pnnd_thomas)
+#prawdopodobienstwo, ze punkt z odpowiedniego procesu/rozkladu ma nablizszego sasiada w odleglosci r
+```
+
+```{r}
+kest_poisson <- Kest(points_poisson, correction = "border")
+plot(kest_poisson, .~r)
+
+kest_strauss <- Kest(points_strauss, correction="border")
+plot(kest_strauss, .~r)
+
+kest_thomas <- Kest(thomas_points, correction="border")
+plot(kest_thomas, .~r)
+
+#odleglosci od ustalonego miejsca odniesienia w oknie do najblizszego punktu danych dla kazdego procesu punktowego
+plot(distmap(points_poisson))
+plot(distmap(points_strauss))
+plot(distmap(thomas_points))
+```
+
+
