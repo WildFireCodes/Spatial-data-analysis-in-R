@@ -59,10 +59,12 @@ districts <- shapefile('osiedla.shp')
 
 ```{r}
 map_cracow <- ggplot() + 
-  geom_polygon(data=districts, aes(x = long, y = lat, group = group), show.legend = FALSE)  + coord_fixed() 
+  geom_polygon(data = districts, aes(x = long, y = lat, group = group), show.legend = FALSE, color = "white", fill = "darkgrey")  + coord_fixed()
 summary(districts)
 
-map_cracow + geom_point(data=data, aes(x=Lon, y=Lat, colour = 'red'), alpha=0.4)
+map_cracow + geom_point(data=data, aes(x=Lon, y=Lat), alpha=0.8, size = 1.2, colour="darkred") +ggtitle("Wykroczenia na mapie Krakowa\n z podzialem na dzielnice") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 
 ```
@@ -99,16 +101,25 @@ library(dbscan)
 
 dbscan_clusters1 <- dbscan(data, minPts = 5, eps = 10)
 dbscan_clusters1
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters1$cluster))
+
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters1$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("DBSCAN, minPts=5, eps=10") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 dbscan_clusters2 <- dbscan(data, minPts = 10, eps = 50)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters2$cluster)) + scale_colour_viridis_c() + theme_bw()
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters2$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("DBSCAN, minPts=10, eps=50") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 dbscan_clusters3 <- dbscan(data, minPts = 10, eps = 100)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters3$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters3$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("DBSCAN, minPts=10, eps=100") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 dbscan_clusters4 <- dbscan(data, minPts = 10, eps = 200)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color =dbscan_clusters4$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color =dbscan_clusters4$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("DBSCAN, minPts=10, eps=200") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 ```
 
@@ -135,16 +146,24 @@ map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color =dbscan_cluster
 
 ```{r}
 hdbscan_cluster1 <- hdbscan(data, minPts = 10)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster1$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster1$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("HDBSCAN, minPts=10") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 hdbscan_cluster2 <- hdbscan(data, minPts = 50)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster2$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster2$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("HDBSCAN, minPts=50") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 hdbscan_cluster3 <- hdbscan(data, minPts = 100)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster3$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster3$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("HDBSCAN, minPts=100") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 hdbscan_cluster4 <- hdbscan(data, minPts = 150)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster4$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster4$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("HDBSCAN, minPts=150") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 ```
 
@@ -161,20 +180,37 @@ map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_clust
 ```{r}
 optics_out1 <- optics(data, minPts = 10)
 optics_cluster1 <- extractDBSCAN(optics_out1, eps_cl = 10)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster1$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster1$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("OPTICS, minPts=10, eps_cl=10") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 optics_out2 <- optics(data, minPts = 10)
 optics_cluster2 <- extractDBSCAN(optics_out2, eps_cl = 50)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster2$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster2$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("OPTICS, minPts=10, eps_cl=50") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 optics_out3 <- optics(data, minPts = 10)
 optics_cluster3 <- extractDBSCAN(optics_out3, eps_cl = 100)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster3$cluster))
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster3$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("OPTICS, minPts=10, eps_cl=100") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 optics_out4 <- optics(data, minPts = 10)
-optics_cluster4 <- extractDBSCAN(optics_out4, eps_cl = 500)
-map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster4$cluster))
+optics_cluster4 <- extractDBSCAN(optics_out4, eps_cl = 650)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster4$cluster), size = 1.2) + scale_colour_viridis_c(option = "magma", name = "Intensywnosc") + ggtitle("OPTICS, minPts=10, eps_cl=650") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Dlugosc geograficzna", y = "Szerokosc geograficzna")
 
 ```
 
-    OPTICS (Ordering points to identify the clustering structure) - 
+    • OPTICS (ordering points to identify the clustering structure) - algorytm wykorzystujacy drzewa kd, stworzony w celu wyeliminowania wad algorytmu DBSCAN. OPTICS w trakcie dzialania dynamicznie rozszerza promien wyszukiwania dookola kazdego przypadku, zamiast ustalania z gory okreslonej wartosci promienia. Po zakonczeniu dzialania, a wie po przejsciu wszystkich przypadkow zwracana jest kolejnosc przetwarzania - "odwiedzin" oraz wynik osiagalnosci.
+
+    • Zalety:
+    - brak narzucania z gory wielkosci promienia
+    - nie wymaga parametrow gestosci
+    - kolejnosc klastrowania moze byc uzyteczna przy wyodrebnianiu informacji o klastrowaniu
+
+    • Wady:
+    - algorytm nie radzi sobie z wielkowymiarowymi danymi
+    - tworzy tylko porzadek klastrowy
