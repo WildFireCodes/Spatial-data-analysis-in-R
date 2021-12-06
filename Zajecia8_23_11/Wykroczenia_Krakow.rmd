@@ -1,0 +1,180 @@
+---
+title: "Wykroczenia_dzielnice_Krakowa"
+author: "Filip Adamiak"
+date: "11/30/2021"
+output: html_document
+---
+
+     1. Wczytanie zestawu danych punktowych oraz nadanie im ukladu wspolrzednych ETRS 1989 Poland CS2000 Zone 7 - EPSG:2178, nastepnie zapisanie ich do nowego pliku csv - zestaw1_epsg_2178.csv.
+
+```{r}
+library(sp)
+
+data_points <- read.csv('zestaw1.csv', colClasses = c('numeric', 'numeric'))
+head(data_points)
+dim(data_points)
+
+coord <- SpatialPoints(cbind(data_points$Long, data_points$Lat), 
+                       proj4string = CRS('+proj=longlat'))
+class(coord)
+length(coord)
+head(coord)
+
+coordUTM <- spTransform(coord, CRS('+init=epsg:2178'))
+head(coordUTM)
+length(coordUTM)
+#uklad CRS pomyslnie zmieniony z WGS84 na EPSG:2178
+
+coordUTM_df <- as.data.frame(coordUTM) #col.names nie dziala - zbadac, z jakiego powodu
+colnames(coordUTM_df) <- c('Lon', 'Lat')
+head(coordUTM_df)
+dim(coordUTM_df) #dlugosc zgadza sie z dlugoscia wczytanych danych
+
+write.csv(coordUTM_df, "zestaw1_epsg_2178.csv", row.names = FALSE)
+```
+
+    2. Wczytanie danych w ukladzie wspolrzednych EPSG:2178 oraz pliku shapefile zawierajacego osiedla.
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(raster)
+
+data <- read.csv('zestaw1_epsg_2178.csv')
+head(data)
+dim(data)
+
+str(data) #2 zmienne - Lon oraz Lat numerical
+sum(is.na(data)) #brak pustych danych
+
+qplot(data$Lon, geom='histogram')
+
+districts <- shapefile('osiedla.shp')
+
+```
+
+    Wczytane dane maja rozmiar 2000 x 2, zaiweraja dlugosc i szerokosc geograficzna - typ numerical, zapisane sa w data.frame o nazwie data, brak pustych danych.
+
+    3. Prezentacja mapy dzielnic/osiedl w Krakowie z nalozonymi na nia wczytanymi punktami.
+
+```{r}
+map_cracow <- ggplot() + 
+  geom_polygon(data=districts, aes(x = long, y = lat, group = group), show.legend = FALSE)  + coord_fixed() 
+summary(districts)
+
+map_cracow + geom_point(data=data, aes(x=Lon, y=Lat, colour = 'red'), alpha=0.4)
+
+
+```
+
+    4. Wydzielenie klastrow o zwiekszonej intensywnosci wystepowania wykroczen przy uzyciu algorytmow grupowania gestosciowego DBSCAN/ HBDSCAN / OPTICS.
+
+    4a
+    • DBSCAN (density-based spatial clustering of applications with noise) - nieliniowy algorytm uczenia sie bez nadzoru, ktory wykorzystuje technikę osiągalności i łączności gęstości. DBSCAN dzieli dane na grupy punktow majace wspolne cechy charakterystyki lub skupienia.
+
+    • Zasada działania algorytmu:
+      1) Losowo wybierany jest punkt p
+      2) Pobierane sa wszystkie punkty, ktorch gestosc jest osiagalna wzgledem punktu p na podstawue maksymalnego promienia sasiedztwa (EPS) oraz minimalnej liczby punktow w sasiedzwie EPS (MinPts)
+      3) Dla kluczowych puntkow p tworzony zostaje klaster, w innym przypadku punkt p zostaje zaklasyfikowany jako punkt odstajacy lub szum.
+      
+    • Klasyfikacja punktów:
+      1) Centralny (core point) - przynajmniej MinPts liczba punktow (wlacznie z samym punktem p) znajduje sie w otoczeniu p z promieniem rownym EPS
+      2) Graniczny (border point) - jezeli punkt jest osiagalny z punktu centralnego i w otoczeniu znajduje sie liczba punktow mniejsza, niz MinPts
+      3) Odstajacy - jezeli punkt nie jest ani granicznym ani centralnym zotaje uznany za odstajacy
+      
+    • Plusy DBSCAN:
+      - dobre dzialanie przy dowolnych ksztaltach klastrow
+      - odporny na wartosci odstajace, jest w stanie je wykryc
+      - nie trzeba wczesniej z gory okreslac liczby klastrow
+      
+    • Minusy DBSCAN:
+      - charakterystyka tworzonych klastrow jest okreslana przez parametry MinPts oraz EPS przez co jezeli ciezko jest czasami utworzyc klastry o znaczacych roznicach w gestosci
+      - czasami wyznaczenie odpowiedniej odleglosci sasiedztwa EPS nie nalezy do latwych i wymaga dodatkowej wiedzy
+      
+    • Zastosowanie DBSCAN z parametrami odpowiednio MinPts i EPS rownymi:
+      5/10, 10/50, 10/100, 10/200
+
+```{r}
+library(dbscan)
+
+dbscan_clusters1 <- dbscan(data, minPts = 5, eps = 10)
+dbscan_clusters1
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters1$cluster))
+
+dbscan_clusters2 <- dbscan(data, minPts = 10, eps = 50)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters2$cluster)) + scale_colour_viridis_c() + theme_bw()
+
+dbscan_clusters3 <- dbscan(data, minPts = 10, eps = 100)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = dbscan_clusters3$cluster))
+
+dbscan_clusters4 <- dbscan(data, minPts = 10, eps = 200)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color =dbscan_clusters4$cluster))
+
+```
+
+    • Wnioski z DBSCAN:
+    1) Dla minPts = 5 i EPS = 10 bardzo mala ilosc klastrow, najwieksze skupisko w rejonie dzielnicy Stare Miasto, nastepnie mozemy zauwazyc klastry o zdecydowanie mniejszej gestosci w dzielniach Pradnik Bialy, Pradnik Czerwony, Mistrzejowice oraz Bienczyce. Szczatkowe ilosci punktow wystepuja rowniez na poludniu w dzielnicy Swoszowice.
+
+    2) Dla minPts = 10 i EPS = 50 zaczynamy zauwazac wyrazne klastry w okolicy dzielnicy Starego Miasta oraz pojedyncze wystepujace na terenie Nowej Huty/Wzgorz Krzeslawickich.
+
+    3) Dla minPts = 10 i EPS = 100 coraz wiecej klastrow o duzej gestosci w dzielnicy Starego Miasta, Grzegorzki, Czyzyny oraz Nowej Huty.
+
+    4) Dla minPts = 10 i EPS = 200 najwieksze, bardzo wyrazne skupisko klastrow w dzielnicy Stare Miasto, nastepnie mozemy zauwazyc wieksze klastry punktow w dzielnicy Krowodrza, Pradnik Bialy, Pradnik Czerwony, Mistrzejowice, Grzegorzki. Mniejsze klastry znajdziemy w Czyzynach, Wzgorzach Krzeslawickich oraz Nowej Hucie. Pojedynczy klaster wystepuje w Podgorzu Duchackim.
+
+
+    4b
+    • HDBSCAN (hierarchical density-based spatial clustering) - bardziej zaawansowana wersja algorytmu DBSCAN. Algorytm wykorzystuje podejscie oparte na gestosci - zamiast szukac klastrow posiadajacych okreslony ksztalt szuka regionow danych, ktore sa gestsze od otaczajacej je przestrzeni.
+
+    • Plusy HDBSCAN:
+      - dla danych o mocno zroznicowanej gestosci jest lepszy oraz szybszy w porownaniu do DBSCAN
+      - HDBSCAN w czasie dzialania odrzuca male odrosty punktow zachowujac najwieksze klastry okreslone przez parametr minimalnego rozmiaru klastra - dzieki temu rowniez dendogram algorytmu HDBSCAN jest mniej skomplikowany
+    • Minusy HDBSCAN:
+      - mimo szybszego czasu dzialania jest duzo ciezszy w zrozumieniu, przez wiele roznych operacji, ktore algorytm wykonuje w czasie dzialania
+    • Zastosowanie HDBSCAN z parametrem minPts wynoszacym odpowiednio:
+    10, 50, 100, 200
+
+```{r}
+hdbscan_cluster1 <- hdbscan(data, minPts = 10)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster1$cluster))
+
+hdbscan_cluster2 <- hdbscan(data, minPts = 50)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster2$cluster))
+
+hdbscan_cluster3 <- hdbscan(data, minPts = 100)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster3$cluster))
+
+hdbscan_cluster4 <- hdbscan(data, minPts = 150)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = hdbscan_cluster4$cluster))
+
+```
+
+    • Wnioski z HDBSCAN:
+    1) Przy parametrze minPts = 10 dominuje duzy klaster obejmujacy dzielnice Stare Miasto, a takze poludniowe dzielnice sasiadujace takie jak Podgorze, 
+    Lagiewniki, wschodnie Grzegorzki, Czyzyny, Bienczyce, Mistrzejowice, oraz polnocne Pradnik Bialy i Czerwony.
+
+    2) Przy parametrze minPts = 50 widac juz dwa klastry, pierwszy najwiekszy obejmujacy Stare Miasto i okolice, drugi w obszarze Mistrzejowic, Bienczyce oraz Nowa Hute.
+
+    3) Dla parametru minPts = 100 brak wiekszych zmian w porownaniu do wyniku z minPts = 50.
+
+    4) Dla parametru minPts = 150 brak klastrow.
+
+```{r}
+optics_out1 <- optics(data, minPts = 10)
+optics_cluster1 <- extractDBSCAN(optics_out1, eps_cl = 10)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster1$cluster))
+
+optics_out2 <- optics(data, minPts = 10)
+optics_cluster2 <- extractDBSCAN(optics_out2, eps_cl = 50)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster2$cluster))
+
+optics_out3 <- optics(data, minPts = 10)
+optics_cluster3 <- extractDBSCAN(optics_out3, eps_cl = 100)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster3$cluster))
+
+optics_out4 <- optics(data, minPts = 10)
+optics_cluster4 <- extractDBSCAN(optics_out4, eps_cl = 500)
+map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluster4$cluster))
+
+```
+
+    OPTICS (Ordering points to identify the clustering structure) - 
