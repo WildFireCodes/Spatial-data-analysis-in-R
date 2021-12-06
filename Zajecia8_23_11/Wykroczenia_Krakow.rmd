@@ -3,9 +3,9 @@ title: "Wykroczenia_dzielnice_Krakowa"
 author: "Filip Adamiak"
 date: "11/30/2021"
 output:
+  html_document: default
   pdf_document: 
     keep_tex: yes
-  html_document: default
 ---
 
      1. Wczytanie zestawu danych punktowych oraz nadanie im ukladu wspolrzednych ETRS 1989 Poland CS2000 Zone 7 - EPSG:2178, nastepnie zapisanie ich do nowego pliku csv - zestaw1_epsg_2178.csv.
@@ -28,7 +28,7 @@ head(coordUTM)
 length(coordUTM)
 #uklad CRS pomyslnie zmieniony z WGS84 na EPSG:2178
 
-coordUTM_df <- as.data.frame(coordUTM) #col.names nie dziala - zbadac, z jakiego powodu
+coordUTM_df <- as.data.frame(coordUTM)
 colnames(coordUTM_df) <- c('Lon', 'Lat')
 head(coordUTM_df)
 dim(coordUTM_df) #dlugosc zgadza sie z dlugoscia wczytanych danych
@@ -48,7 +48,7 @@ head(data)
 dim(data)
 
 str(data) #2 zmienne - Lon oraz Lat numerical
-sum(is.na(data)) #brak pustych danych
+sum(is.na(data))
 
 districts <- shapefile('osiedla.shp')
 
@@ -205,6 +205,7 @@ map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluste
 
 ```
 
+    4c
     • OPTICS (ordering points to identify the clustering structure) - algorytm wykorzystujacy drzewa kd, stworzony w celu wyeliminowania wad algorytmu DBSCAN. OPTICS w trakcie dzialania dynamicznie rozszerza promien wyszukiwania dookola kazdego przypadku, zamiast ustalania z gory okreslonej wartosci promienia. Po zakonczeniu dzialania, a wie po przejsciu wszystkich przypadkow zwracana jest kolejnosc przetwarzania - "odwiedzin" oraz wynik osiagalnosci.
 
     • Zalety:
@@ -226,5 +227,5 @@ map_cracow + geom_point(data = data, aes(x = Lon, y = Lat, color = optics_cluste
     4) Dla parametru minPts = 10, eps_cl = 650 brak wyraznych klastrow - zmiana intensywnosci klastrow w centrum i Bienczycach oraz Mistrzejowicach na niska, pojedyncze nowe punkty o wysokiej intensywnosci w okolicy Ruczaju, Woli Duchackiej i Lagiewnik.
 
 
-    PODSUMOWANIE WYNIKOW:
+    5. PODSUMOWANIE WYNIKOW:
     Analizujac otrzymane klastry na podstawie uzytych algorytmow i parametrow mysle, ze wnioski mozemy uznac za zaskakujace. Wbrew oczekiwaniom najlepsze rezultaty otrzymalem algorytmem HDBSCAN zamiast OPTICS. HDBSCAN wydzielil dwa duze klastry w rejonie dzielnic Stare Miasto, Krowodrza, Grzegorzki oraz Mistrzejowice/Bienczyce oraz okolice - tam mozemy stwierdzic najwyzsza przestepczosc. Szczatkowa ilosc zarejestrowanych przestepstw wystepuje na obszarze Lagiewnik, Woli Duchackiej oraz Ruczaju i Biezanowa.
