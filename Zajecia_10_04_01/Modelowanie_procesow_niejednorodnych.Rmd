@@ -1,0 +1,135 @@
+---
+title: "Modelowanie_procesow_niejednorodnych"
+author: "Filip Adamiak"
+date: "1/4/2022"
+output: html_document
+---
+
+## 1. Wczytanie danych lansing.
+
+```{r}
+library(spatstat)
+data <- lansing
+str(data)
+summary(data)
+
+```
+
+    Dane zawieraja informacje na temat lokalizacji 2251 drzew i ich botanicznej klasyfikacji, zrodlem jest las znajdujacy sie Michigan w USA.
+
+    Data jest obiektem klasy ppp (point pattern of tree locations).
+
+```{r}
+plot(data$marks)
+```
+
+```{r}
+data_split <- split(data)
+plot(data_split)
+
+```
+
+## 2. Wydzielenie dwoch zbiorow zawierajacych czarne deby i klony.
+
+```{r}
+blackoak <- data_split$blackoak
+maple <- data_split$maple
+
+summary(blackoak)
+
+```
+
+```{r}
+plot(density(blackoak))
+plot(blackoak, add = TRUE, pch = 19, cex = 1.2)
+
+blackoak_q <- quadratcount(blackoak, 4, 4,)
+plot(blackoak, pch = 1, cex = 0.3)
+plot(blackoak_q, add =  TRUE, cex = 2)
+ 
+blackoak_test <- quadrat.test(blackoak_q)
+blackoak_test
+
+persp(density(blackoak))
+
+plot(blackoak, pch = 1, cex = 0.5)
+contour(density(blackoak), add = TRUE)
+```
+
+```{r}
+plot(density(maple))
+plot(maple, add = TRUE, pch = 19, cex = 1.2)
+
+maple_q <- quadratcount(maple, 4, 4,)
+plot(maple, pch = 1, cex = 0.3)
+plot(maple_q, add =  TRUE, cex = 2)
+ 
+maple_test <- quadrat.test(maple_q)
+maple_test
+
+persp(density(maple))
+
+plot(maple, pch = 1, cex = 0.5)
+contour(density(maple), add = TRUE)
+```
+
+## 3. Intensywnosc rozkladow punktow przy pomocy funkcji ppm.
+
+```{r}
+ppm(blackoak)
+ppm(maple)
+```
+
+## 4. Test Kołmogorowa-Smirnowa.
+
+```{r}
+ks.test(blackoak$x, pnorm)
+ks.test(blackoak$y, pnorm)
+
+
+```
+
+```{r}
+ks.test(maple$x, pnorm)
+ks.test(maple$y, pnorm)
+```
+
+## 5. Wyznaczenie zmiennej w przestrzeni instensywnosci rozkladu (blackoak).
+
+```{r}
+fit1 <- ppm(blackoak ~x+y)
+fit1
+
+class(fit1)
+summary(fit1)
+
+plot(blackoak, pch=19)
+abline(fit1$coef[2], fit1$coef[3])
+#plot(blackoak, add = TRUE, pch = 19, cex = 0.7)
+```
+
+    Rezyduum modelu (różnica intensywności obeserwowanej oraz modelu).
+
+## 6. Test Kołomogorowa-Smirnowa jakości dopasowania modelu do zmian intensywności.
+
+```{r}
+cdf.test(fit1,"x")
+cdf.test(fit1,"y")
+
+```
+
+## 7. Proces losowy o zmiennej intensywnosci.
+
+```{r}
+set.seed(100)
+proccess=rmh(fit1)
+ppm(proccess)
+```
+
+## 8. Analiza modelu i jakosci dopasowania na podstawie reszt.
+
+```{r}
+diagnose.ppm(fit1)
+```
+
+## 
