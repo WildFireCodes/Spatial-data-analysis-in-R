@@ -1,0 +1,55 @@
+```{r}
+#a Hipoteza statystyczna to stwerdzenie dotyczace rozkladu populacji 
+# Hipoteza zerowa to taka, gdzie brak jest roznicy miedzy analizowanymi parametrami/rozkladami 
+#Hipoteza H1 czyli badawcza jest przeciwienstwem H0
+
+#b Poziom istotnosci to masymalne (dopuszczalne) prawdopodobienstwi popelnienia bledu
+
+#c Oznacza to, ze dane podlegaja rozkladowi wedlug krzywej Gaussa - w okolicy wartosci sredniej zawiera sie 68% obeserwacji, im wieksze odchylenie standardowe tym wiecej obserwacji z naszej proby jest oddalnych od sredniej wartosci, srednia rowna sie medianie i dominancie
+
+#d Dystrybuanta oznacza prawdopodobienstwo zajscia zdarzenia mniejszego badz rownego np t przy oznaczeniu Fx(t)
+#iad.projekty@gmail.com
+```
+
+```{r}
+x<-seq(-2,2,0.01)
+
+x_density<-dnorm(x)
+plot(x,x_density,type="l",
+     xlab="x", ylab="Rozklad prawdopodobienstwa")
+
+dist<-pnorm(x)
+plot(dist)
+
+
+library(sp)
+data<-readRDS("ca_geo.rds",refhook=NULL)
+class(data)
+data_df<-as.data.frame(data)
+summary(data_df['pH'])
+
+pH<-data_df['pH']
+sapply(pH,sd,na.rm=TRUE)
+quantile(pH,na.rm=TRUE)
+IQR(data$pH,na.rm=TRUE)
+
+hist(data$pH)
+#estymator
+density(data_df$pH,na.rm=TRUE)
+#ggdensity()
+
+boxplot(data_df$pH,data=data_df,main="Wykres pudelkowy zmiennej pH")
+
+library(dplyr)
+
+pH_standardized<-
+  pH %>%
+  mutate(pH_1=scale(pH))
+
+#pH_1 jest efektem standaryzacji - srednia 0, sd=1
+summary(pH_standardized)
+hist(pH_standardized$pH_1,main="Zmienna pH po standaryzacji")
+
+shapiro.test(data_df$pH) #mozna odrzucic hipoteze H0 - zerowa
+```
+
