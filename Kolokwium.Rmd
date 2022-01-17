@@ -1,0 +1,93 @@
+---
+title: "KOLOS"
+author: "Filip Adamiak"
+date: "1/17/2022"
+output: html_document
+---
+
+## Zajecia 1
+
+```{r}
+1. Posortuj przefiltrowane dane według zmiennej ‘carat’ w kolejności malejącej.
+arrange(diamonds, carat)
+```
+
+## Zajecia 2
+
+```{r}
+1. Gestosc prawdopodobienstwa rozkladu normalnego - dnorm
+2. Dystrybuanta rozkladu normalnego - pnorm
+3. quantile(pH,na.rm=TRUE) - kwantyle
+4. IQR(data$pH,na.rm=TRUE) - rozstep miedzykwartylowy
+5. density(data_df$pH,na.rm=TRUE) - estymator jadrowy to funkcja gestosci
+6. pH_standardized<-
+  pH %>%
+  mutate(pH_1=scale(pH)) - standaryzacja zmiennej - srednia 0, odchylenie 1
+7. shapiro.test() - test normalnosci rozkladu testem Shapiro-Wilka
+```
+
+## Zajecia 3
+
+```{r}
+1. cov() - kowariancja
+   cor() - korelacja
+2. cor.test() - stopien istotnosci korelacji miara Pearsona
+3. lm(zmienna_przewidywana~predictor) - model regresji liniowej
+4. ggscatter(cats, x = "Bwt", y = "Hwt", cor.coef = TRUE, cor.method = "pearson", add = "reg.line", add.params = list(color = "black", fill = "lightgray" ), conf.int = TRUE  ) - graficzne przedstawienie korelacji miedzy dwoma zmiennymi, metoda pearson. Dodatkowo wyswietlamy regresje liniowa.
+
+```
+
+## Zajecia 4
+
+```{r}
+1. data.frame(runif(200,min=0,max=1),runif(200,min=0,max=2)) - generowanie 200 punktow rownomiernie rozmieszczonych w obszarze prostokatnym x=[0,1], y=[0,2]
+2. coord_fixed() - odpowiednie przeskalowanie, aby na X i Y byla taka sama proporcja - dla danych przestrzennych X:Y powinno wynosic 1:1
+3. r_squared<-runif(300,min=0,max=100)
+  angle<-runif(300,min=0,max=2*pi)
+
+  #obliczanie wspolrzednych x i y
+  x<-sqrt(r_squared)*cos(angle)
+  y<-sqrt(r_squared)*sin(angle) - 300 punktow rownomiernie rozmieszczonych w   okregu o promieniu 100, nastepnie wylicza sie kat i wspolrzedne X i Y
+4. plot(disc(radius=10),main='Points2 and disc with 10 radius')
+  points(points2$X,points2$Y) - okrag o promieniu 10 z wygenerowanymi punktami, wymaga spatstat
+5. ppp() - planar point pattern do np testu pozniejszego
+6. quadrat.test() - test obserwowanych i zliczanych punktow w kazdym kwadracie
+7. rpoispp(lambda=500/area(disc(radius=10)),win=disc(radius=10)) - generuje proces punktowy Poissona. Okno to okrag o promieniu 10, lambda to ilosc punktow/aproksywowana ilosc punktow powierzchni kola dla tego przypadku.
+
+```
+
+## Zajecia 5
+
+```{r}
+1. quadratcount(data$gold,5,5,) - zliczanie w kwadratach, siatka 5 x 5
+2. persp(nde,main="Mapa 3D estymatora jadrowego gestosci")
+contour(nde,main="Izolinia 2D") - wykresy zwiazane z gestoscia, odpowiednio 3D i konturowy 2D
+3. distfun() - wraca
+ona funkcję z argumentami (x,y) za pomocą której możemy oszacować odległości w dowolnej
+lokalizacji przestrzennej. Oblicz wartości tej funkcji.
+4. plot(distmap(data$faults)) - odleglosc pixela od wystepowania uskoku
+
+```
+
+## Zajecia 6
+
+```{r}
+1. pairdist() - odleglosci wzajemne, liczone miedzy wszystkimi odrebnymi parami punktow
+2. nndist() - odleglosc miedzy punktem xi a najblizszym sasiadem
+3. distmap() - odległość od ustalonego miejsca odniesienia u w
+oknie do najbliższego punktu danych
+4. Zbior punktowy rozklad niezalezny - rpoispp(1, win=disc(10))
+5. Zbior punktowy rozklad regularny - rStrauss(1, gamma=0.3, W=disc(10))
+6. Zbior punktow rozklad pogrupowany z tendencja do klasteryzacji - rThomas(kappa=0.3, scale=2,  mu=2, win=disc(10))
+7. Prawdopodobienstwo, ze punkt ma najblizszego sasiada w odleglosci r G(r) - Gest()
+8. Oszacowanie funkcji K dla odpowiedniego procesu - Kest()
+kest_strauss <- Kest(points_strauss, correction="border")
+plot(kest_strauss, .~r) - przy wyswietlaniu trzeba dodac to r
+
+```
+
+## ArcGIS
+
+```{r}
+
+```
